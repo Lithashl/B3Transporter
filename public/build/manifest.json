@@ -1,0 +1,33 @@
+{
+  "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff": {
+    "file": "assets/bootstrap-icons-DIW_sQAl.woff",
+    "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff"
+  },
+  "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2": {
+    "file": "assets/bootstrap-icons-pHno5dML.woff2",
+    "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-Cb-adG7m.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/chat.js": {
+    "file": "assets/chat-l0sNRNKZ.js",
+    "name": "chat",
+    "src": "resources/js/chat.js",
+    "isEntry": true
+  },
+  "resources/js/preview.js": {
+    "file": "assets/preview-l0sNRNKZ.js",
+    "name": "preview",
+    "src": "resources/js/preview.js",
+    "isEntry": true
+  },
+  "resources/sass/app.scss": {
+    "file": "assets/app-DM9LwI2y.css",
+    "src": "resources/sass/app.scss",
+    "isEntry": true
+  }
+}

@@ -1,0 +1,146 @@
+
+.btn-primary{
+    background-color:  #0B677E !important;
+}
+.secondary-color{
+    text-decoration: none;
+    color: #FF7E02;
+}
+.custom-check{
+    border: 2px solid #FF7E02;
+}
+.bg-auth {
+    --bs-bg-opacity: 1;
+    background-image: url("../img/auth-background.png") !important;
+    background-size: cover;
+
+}
+.fullscreen {
+    height: 100vh;
+}
+.fullwidth{
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.clean {
+    border: none;
+    background-color: transparent;
+
+}
+.auth-nav {
+    position: absolute;
+
+}
+.container_form {
+    margin: 0;
+}
+.form_custom {
+    padding: 3% 4%;
+    font-size: 130%;
+    border: 1px solid black;
+}
+.nav_space{
+    margin-top: 60px;
+}
+.back-button{
+    font-size: 250%;
+    margin-left: 80px;
+    vertical-align: middle;
+}
+.back-text{
+    font-size: 60%;
+    padding: 0 20px;
+    vertical-align: middle;
+}
+.clean-text{
+    text-decoration: none;
+    color: black;
+}
+.clean-text-only{
+    text-decoration: none;
+}
+.text-right{
+    text-align: right;
+}
+.login-space{
+    margin-top: 15%;
+}
+div .container_form a:hover{
+    color: #0B677E;
+}
+.dashboard-bg{
+    background-color: #F3F3F3;
+}
+.icon-side-nav{
+    width : 24px;
+    height: 24px;
+    fill: #757575;
+}
+.c_home-frame31, .c_home-frame32, .c_home-frame33, .c_home-frame44, .c_home-frame60{
+    max-width: 1920px; 
+}
+.gap25{
+    gap: 25px;
+}
+.container-content{
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    overflow: scroll;
+    height: 96.5vh;
+}
+.active, .c_home-frame16 a:hover{
+    color: #fff !important;
+    background-color: #0b677e;
+}
+.c_chat-cust-frame31 {
+    width: 100%;
+    display: flex;
+    position: relative;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    gap: 20px;
+    overflow: hidden;
+    align-items: flex-start;
+    flex-direction: column;
+}
+.c_chat-cust-frame66 {
+    padding: 10px;
+}
+.w-30{
+    max-width: 30px;
+}
+.w-350{
+    max-width: 350px;
+}
+.w-150{
+    max-width: 150px;
+}
+.label, .equal, .detail{
+    padding: 10px;
+}
+.c_home-frame31, .c_chat-cust-frame31, .c_chat-cust-frame32, .c_chat-cust-frame33{
+    min-height: 95vh;
+}
+.endsession {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 0.5px solid grey;
+}
+.employee_form, .account_form, .account_button{
+    font-size: 120%;
+    padding: 15px;
+}
+.account_label{
+    font-size: 120%;
+    margin-top: 2%;
+}
+
+
+/* @media screen and (max-width:700px) {
+    .icon-side-nav{
+        width : 5px;
+        height: 5px;
+    
+    }
+} */
