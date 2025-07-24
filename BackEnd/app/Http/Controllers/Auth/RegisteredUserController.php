@@ -14,6 +14,8 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
+    private const MAX_LENGTH = 255;
+
     /**
      * Display the registration view.
      */
@@ -30,28 +32,25 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'name' => ['required', 'string', 'max:'.self::MAX_LENGTH],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:'.self::MAX_LENGTH, 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'phone_number' => ['required', 'string', 'max:255'],
+            'phone_number' => ['required', 'string', 'max:'.self::MAX_LENGTH],
         ]);
-        $check_email = User::where("email","=", $request->email)->count();
-        if($check_email == 0){
+
+        $check_email = User::where("email", "=", $request->email)->count();
+
+        if ($check_email === 0) {
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'phone_number' => $request->phone_number,
             ]);
+
+            return redirect()->route('login')->with('success', 'Registrasi berhasil!');
+        } else {
+            return redirect()->back()->with('error', 'Email sudah terdaftar!');
         }
-        else{
-            echo '<script>alert("Email '.$request->email.' sudah terdaftar!")</script>';
-        }
-
-        // event(new Registered($user));
-
-        //Auth::login($user);
-
-        return redirect(route('/login', absolute: true));
     }
 }
