@@ -9,100 +9,103 @@ use App\Models\PickupHistory;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 
 class ThirdSideBarController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
-        $var = '';
-        if($user->role == 'admin'){
-            $requestpickup = '';
-            $users = User::all()->where('role', '=', 'employee');
-            $pickups='';
-        }
-        else if($user-> role == 'customer'){
-            $requestpickup = RequestPickup::all() -> where('cust_email','=', $user->email);
-            $pickups = '';
+
+        $requestpickup = null;
+        $users = null;
+        $pickups = null;
+
+        if ($user->role === 'admin') {
+            $users = User::where('role', 'employee')->get();
+        } elseif ($user->role === 'customer') {
+            $requestpickup = RequestPickup::where('cust_email', $user->email)->get();
             $users = User::all();
-        }
-        else{
-            $pickups = Pickup::all()->where('employee_email','=', $user->email);
+        } else {
+            $pickups = Pickup::where('employee_email', $user->email)->get();
             $requestpickup = RequestPickup::all();
             $users = User::all();
         }
+
         $menu_section = 'thirdsidebar';
-        $data = [$user, $requestpickup, $users, $pickups, $menu_section];
-        return view('thirdsidebar')->with('data',$data);
+
+        return view('thirdsidebar')->with([
+            'data' => [$user, $requestpickup, $users, $pickups, $menu_section]
+        ]);
     }
+
     public function update($req_id, $pickup_id)
     {
-        $update = RequestPickup::where('id', '=', $req_id)->update(['pickup_id'=>$pickup_id, 'status'=>'Picked']);
-        return redirect(('/thirdsidebar'));
+        RequestPickup::where('id', $req_id)->update([
+            'pickup_id' => $pickup_id,
+            'status' => 'Picked'
+        ]);
 
+        return redirect('/thirdsidebar');
     }
+
     public function store(Request $request)
     {
         $user = Auth::user();
-    
-        // pick section for employee
-        if ($request->request_id != '') {
+
+        // Karyawan pick
+        if (!empty($request->request_id)) {
             $pickup = Pickup::create([
                 'employee_email' => $user->email,
             ]);
-    
+
             $this->update($request->request_id, $pickup->id);
             return redirect('/thirdsidebar')->with('success', 'Pickup berhasil dilakukan.');
         }
-    
-        // complete for employee
-        if (isset($request->complete)) {
+
+        // Complete
+        if ($request->has('complete')) {
             return $this->employee_action($request, 'complete');
         }
-    
-        // cancel for employee
-        if (isset($request->cancel)) {
+
+        // Cancel
+        if ($request->has('cancel')) {
             return $this->employee_action($request, 'cancel');
         }
-    
-        // customer cancels request
-        if (isset($request->cust_cancel_request)) {
+
+        // Customer cancel
+        if ($request->has('cust_cancel_request')) {
             return $this->customer_action($request);
         }
 
-    
-        // employee add or update
-        if (isset($request->employee_register)) {
+        // Register/update employee
+        if ($request->has('employee_register')) {
             if (strlen($request->employee_password) < 8) {
                 return redirect('/thirdsidebar')->with('error', 'Password minimal 8 karakter!');
             }
-    
-            if ($request->employee_register == 'Ubah') {
+
+            if ($request->employee_register === 'Ubah') {
                 if ($request->employee_password !== $request->employee_c_password) {
                     return redirect('/thirdsidebar')->with('error', 'Password tidak sama!');
                 }
-    
+
                 User::where('id', $request->employee_id)->update([
                     'name' => $request->employee_name,
                     'email' => $request->employee_email,
                     'password' => Hash::make($request->employee_password),
                     'phone_number' => $request->employee_phone_number,
                 ]);
-    
+
                 return redirect('/thirdsidebar')->with('success', 'Data karyawan berhasil diubah!');
             }
-    
-            // Tambah karyawan baru
-            $check_email = User::where("email", $request->employee_email)->count();
-            if ($check_email > 0) {
-                return redirect('/thirdsidebar')->with('error', 'Email ' . $request->employee_email . ' sudah terdaftar!');
+
+            if (User::where('email', $request->employee_email)->exists()) {
+                return redirect('/thirdsidebar')->with('error', 'Email sudah terdaftar!');
             }
-    
+
             if ($request->employee_password !== $request->employee_c_password) {
                 return redirect('/thirdsidebar')->with('error', 'Password tidak sama!');
             }
-    
+
             User::create([
                 'name' => $request->employee_name,
                 'email' => $request->employee_email,
@@ -110,21 +113,21 @@ class ThirdSideBarController extends Controller
                 'phone_number' => $request->employee_phone_number,
                 'role' => 'employee'
             ]);
-    
+
             return redirect('/thirdsidebar')->with('success', 'Karyawan berhasil ditambahkan!');
         }
-    
+
         return redirect('/thirdsidebar');
     }
 
     public function employee_action($request, $action)
     {
         $status = '';
-    
-        if ($action == 'complete') {
+
+        if ($action === 'complete') {
             RequestPickup::where('id', $request->action_request_id)->update(['status' => 'Completed']);
             $status = 'Completed';
-        } elseif ($action == 'cancel') {
+        } elseif ($action === 'cancel') {
             RequestPickup::where('id', $request->action_request_id)->update([
                 'status' => 'waiting for decision',
                 'pickup_id' => null
@@ -132,7 +135,7 @@ class ThirdSideBarController extends Controller
             Pickup::where('id', $request->pickup_id)->delete();
             $status = 'Cancelled';
         }
-    
+
         PickupHistory::create([
             'cust_email' => $request->cust_email,
             'cust_name' => $request->cust_name,
@@ -141,15 +144,15 @@ class ThirdSideBarController extends Controller
             'volume' => $request->volume,
             'status' => $status,
         ]);
-    
-        return redirect('/thirdsidebar')->with('success', 'Pickup ' . strtolower($status) . '!');
+
+        return redirect('/thirdsidebar')->with('success', 'Pickup berhasil ' . strtolower($status) . '.');
     }
 
     public function customer_action($request)
     {
-        $delete = RequestPickup::where('id', '=', $request->cust_cancel_request_id)->delete();
-    
-        $pickup_history = PickupHistory::create([
+        RequestPickup::where('id', $request->cust_cancel_request_id)->delete();
+
+        PickupHistory::create([
             'cust_email' => $request->cust_email,
             'cust_name' => $request->cust_name,
             'employee_email' => '-',
@@ -157,18 +160,19 @@ class ThirdSideBarController extends Controller
             'volume' => $request->volume,
             'status' => $request->status,
         ]);
-    
+
         return redirect('/thirdsidebar')->with('success', 'Request berhasil dibatalkan.');
     }
 
-    public static function getPickup($id) {
-        $requestpickup = RequestPickup::where('pickup_id','=',$id)->first();
-        return $requestpickup;
+    public static function getPickup($id)
+    {
+        return RequestPickup::where('pickup_id', $id)->first();
     }
-    public static function getEmployeeName($id_pickup){
-        $email = Pickup::find($id_pickup);
-        $employee = User::where('email', '=', $email->employee_email)->first();
-        return $employee->name;
+
+    public static function getEmployeeName($id_pickup)
+    {
+        $pickup = Pickup::find($id_pickup);
+        $employee = User::where('email', $pickup->employee_email)->first();
+        return $employee?->name ?? '-';
     }
-    
 }
