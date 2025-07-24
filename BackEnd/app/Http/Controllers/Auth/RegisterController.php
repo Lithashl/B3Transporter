@@ -46,15 +46,18 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    protected function validator(array $data)
-    {
-        return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'phone_number' => ['required', 'string', 'max:255'],
-        ]);
-    }
+     // Tambahkan konstanta di dalam class
+        private const MAX_LENGTH = 255;
+    
+        protected function validator(array $data)
+        {
+            return Validator::make($data, [
+                'name' => ['required', 'string', 'max:' . self::MAX_LENGTH],
+                'email' => ['required', 'string', 'email', 'max:' . self::MAX_LENGTH, 'unique:users'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'phone_number' => ['required', 'string', 'max:' . self::MAX_LENGTH],
+            ]);
+        }
 
     /**
      * Create a new user instance after a valid registration.
