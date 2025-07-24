@@ -70,6 +70,7 @@ class ThirdSideBarController extends Controller
         if (isset($request->cust_cancel_request)) {
             return $this->customer_action($request);
         }
+
     
         // employee add or update
         if (isset($request->employee_register)) {
@@ -119,21 +120,20 @@ class ThirdSideBarController extends Controller
     public function employee_action($request, $action)
     {
         $status = '';
-        if ($action == 'complete')
-        {
-            $update = RequestPickup::where('id', '=', $request->action_request_id)->update(['status'=>'Completed']);
+    
+        if ($action == 'complete') {
+            RequestPickup::where('id', $request->action_request_id)->update(['status' => 'Completed']);
             $status = 'Completed';
-            echo '<script>alert("Pickup berhasil!")</script>';
-        }
-        else if($action == 'cancel')
-        {
-            $update = RequestPickup::where('id', '=', $request->action_request_id)->update(['status'=>'waiting for decision']);
-            $update = RequestPickup::where('id', '=', $request->action_request_id)->update(['pickup_id'=>NULL]);
-            $delete = Pickup::where('id', '=', $request->pickup_id)->delete();
+        } elseif ($action == 'cancel') {
+            RequestPickup::where('id', $request->action_request_id)->update([
+                'status' => 'waiting for decision',
+                'pickup_id' => null
+            ]);
+            Pickup::where('id', $request->pickup_id)->delete();
             $status = 'Cancelled';
-            echo '<script>alert("Pickup dibatalkan")</script>';
         }
-        $pickup_history = PickupHistory::create([
+    
+        PickupHistory::create([
             'cust_email' => $request->cust_email,
             'cust_name' => $request->cust_name,
             'employee_email' => $request->employee_email,
@@ -141,13 +141,14 @@ class ThirdSideBarController extends Controller
             'volume' => $request->volume,
             'status' => $status,
         ]);
-        return redirect(('/thirdsidebar'));
+    
+        return redirect('/thirdsidebar')->with('success', 'Pickup ' . strtolower($status) . '!');
     }
+
     public function customer_action($request)
     {
         $delete = RequestPickup::where('id', '=', $request->cust_cancel_request_id)->delete();
-        echo '<script>alert("Request dibatalkan")</script>';
-
+    
         $pickup_history = PickupHistory::create([
             'cust_email' => $request->cust_email,
             'cust_name' => $request->cust_name,
@@ -156,10 +157,9 @@ class ThirdSideBarController extends Controller
             'volume' => $request->volume,
             'status' => $request->status,
         ]);
+    
+        return redirect('/thirdsidebar')->with('success', 'Request berhasil dibatalkan.');
     }
-    // public function check_email(Request $request){
-    //     return Redirect::index();
-    // }
 
     public static function getPickup($id) {
         $requestpickup = RequestPickup::where('pickup_id','=',$id)->first();
