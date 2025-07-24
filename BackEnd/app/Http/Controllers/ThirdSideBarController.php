@@ -12,9 +12,6 @@ use Illuminate\Support\Facades\Auth;
 
 class ThirdSideBarController extends Controller
 {
-    /** Gunakan konstanta untuk path yang berulang */
-    private const SIDEBAR_PATH = '/thirdsidebar';
-
     public function index()
     {
         $user = Auth::user();
@@ -48,79 +45,86 @@ class ThirdSideBarController extends Controller
             'status' => 'Picked'
         ]);
 
-        return redirect(self::SIDEBAR_PATH);
+        return redirect('/thirdsidebar');
     }
 
     public function store(Request $request)
     {
         $user = Auth::user();
 
-        // Karyawan pick
         if (!empty($request->request_id)) {
-            $pickup = Pickup::create([
-                'employee_email' => $user->email,
-            ]);
-
-            $this->update($request->request_id, $pickup->id);
-            return redirect(self::SIDEBAR_PATH)->with('success', 'Pickup berhasil dilakukan.');
+            return $this->handlePickup($request, $user);
         }
 
-        // Complete
         if ($request->has('complete')) {
             return $this->employee_action($request, 'complete');
         }
 
-        // Cancel
         if ($request->has('cancel')) {
             return $this->employee_action($request, 'cancel');
         }
 
-        // Customer cancel
         if ($request->has('cust_cancel_request')) {
             return $this->customer_action($request);
         }
 
-        // Register/update employee
         if ($request->has('employee_register')) {
-            if (strlen($request->employee_password) < 8) {
-                return redirect(self::SIDEBAR_PATH)->with('error', 'Password minimal 8 karakter!');
-            }
-
-            if ($request->employee_register === 'Ubah') {
-                if ($request->employee_password !== $request->employee_c_password) {
-                    return redirect(self::SIDEBAR_PATH)->with('error', 'Password tidak sama!');
-                }
-
-                User::where('id', $request->employee_id)->update([
-                    'name' => $request->employee_name,
-                    'email' => $request->employee_email,
-                    'password' => Hash::make($request->employee_password),
-                    'phone_number' => $request->employee_phone_number,
-                ]);
-
-                return redirect(self::SIDEBAR_PATH)->with('success', 'Data karyawan berhasil diubah!');
-            }
-
-            if (User::where('email', $request->employee_email)->exists()) {
-                return redirect(self::SIDEBAR_PATH)->with('error', 'Email sudah terdaftar!');
-            }
-
-            if ($request->employee_password !== $request->employee_c_password) {
-                return redirect(self::SIDEBAR_PATH)->with('error', 'Password tidak sama!');
-            }
-
-            User::create([
-                'name' => $request->employee_name,
-                'email' => $request->employee_email,
-                'password' => Hash::make($request->employee_password),
-                'phone_number' => $request->employee_phone_number,
-                'role' => 'employee'
-            ]);
-
-            return redirect(self::SIDEBAR_PATH)->with('success', 'Karyawan berhasil ditambahkan!');
+            return $this->handleEmployeeRegistration($request);
         }
 
-        return redirect(self::SIDEBAR_PATH);
+        return redirect('/thirdsidebar');
+    }
+
+    private function handlePickup(Request $request, $user)
+    {
+        $pickup = Pickup::create([
+            'employee_email' => $user->email,
+        ]);
+
+        $this->update($request->request_id, $pickup->id);
+
+        return redirect('/thirdsidebar')->with('success', 'Pickup berhasil dilakukan.');
+    }
+
+    private function handleEmployeeRegistration(Request $request)
+    {
+        if (strlen($request->employee_password) < 8) {
+            return redirect('/thirdsidebar')->with('error', 'Password minimal 8 karakter!');
+        }
+
+        if ($request->employee_password !== $request->employee_c_password) {
+            return redirect('/thirdsidebar')->with('error', 'Password tidak sama!');
+        }
+
+        if ($request->employee_register === 'Ubah') {
+            return $this->updateEmployee($request);
+        }
+
+        if (User::where('email', $request->employee_email)->exists()) {
+            return redirect('/thirdsidebar')->with('error', 'Email sudah terdaftar!');
+        }
+
+        User::create([
+            'name' => $request->employee_name,
+            'email' => $request->employee_email,
+            'password' => Hash::make($request->employee_password),
+            'phone_number' => $request->employee_phone_number,
+            'role' => 'employee'
+        ]);
+
+        return redirect('/thirdsidebar')->with('success', 'Karyawan berhasil ditambahkan!');
+    }
+
+    private function updateEmployee(Request $request)
+    {
+        User::where('id', $request->employee_id)->update([
+            'name' => $request->employee_name,
+            'email' => $request->employee_email,
+            'password' => Hash::make($request->employee_password),
+            'phone_number' => $request->employee_phone_number,
+        ]);
+
+        return redirect('/thirdsidebar')->with('success', 'Data karyawan berhasil diubah!');
     }
 
     public function employee_action($request, $action)
@@ -148,7 +152,7 @@ class ThirdSideBarController extends Controller
             'status' => $status,
         ]);
 
-        return redirect(self::SIDEBAR_PATH)->with('success', 'Pickup berhasil ' . strtolower($status) . '.');
+        return redirect('/thirdsidebar')->with('success', 'Pickup berhasil ' . strtolower($status) . '.');
     }
 
     public function customer_action($request)
@@ -164,7 +168,7 @@ class ThirdSideBarController extends Controller
             'status' => $request->status,
         ]);
 
-        return redirect(self::SIDEBAR_PATH)->with('success', 'Request berhasil dibatalkan.');
+        return redirect('/thirdsidebar')->with('success', 'Request berhasil dibatalkan.');
     }
 
     public static function getPickup($id)
