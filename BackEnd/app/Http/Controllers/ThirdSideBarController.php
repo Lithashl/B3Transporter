@@ -45,77 +45,77 @@ class ThirdSideBarController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+    
         // pick section for employee
-        if($request->request_id !=''){
+        if ($request->request_id != '') {
             $pickup = Pickup::create([
                 'employee_email' => $user->email,
             ]);
-            
+    
             $this->update($request->request_id, $pickup->id);
+            return redirect('/thirdsidebar')->with('success', 'Pickup berhasil dilakukan.');
         }
+    
         // complete for employee
-        else if(isset($request->complete)){
-            
-            $this->employee_action($request,'complete');
+        if (isset($request->complete)) {
+            return $this->employee_action($request, 'complete');
         }
+    
         // cancel for employee
-        else if(isset($request->cancel)){
-            $this->employee_action($request, 'cancel');
+        if (isset($request->cancel)) {
+            return $this->employee_action($request, 'cancel');
         }
-        else if(isset($request->cust_cancel_request)){
-            $this->customer_action($request);
+    
+        // customer cancels request
+        if (isset($request->cust_cancel_request)) {
+            return $this->customer_action($request);
         }
-
-        // employee add and update
-        if(isset($request->employee_register)){
-            if(strlen($request -> employee_password) >= 8){
-                if($request->employee_register == 'Ubah'){
-                    if($request->employee_password == $request->employee_c_password){
-                        $update = User::where('id', '=', $request->employee_id)
-                            ->update(
-                                [
-                                    'name'=>$request->employee_name,
-                                    'email'=>$request->employee_email,
-                                    'password'=>Hash::make($request->employee_password),
-                                    'phone_number'=>$request->employee_phone_number,
-                                ]
-                            );
-                        echo '<script>alert("Berhasil diubah!")</script>';
-                    }
-                    else{
-                        echo '<script>alert("Password tidak sama!")</script>';
-                    }
-                }
-                else{
-                    $check_email = User::where("email", "=", $request->employee_email)->count();
-                    if($check_email == 0){
-                        if($request->employee_password == $request->employee_c_password){
-                            $user = User::create([
-                                'name' => $request->employee_name,
-                                'email' => $request->employee_email,
-                                'password' => Hash::make($request->employee_password),
-                                'phone_number' => $request->employee_phone_number,
-                                'role' => 'employee'
-                            ]);
-                            echo '<script>alert("Karyawan berhasil ditambahkan!")</script>';
-                        }
-                        else{
-                            echo '<script>alert("Password tidak sama!")</script>';
-                        }
-                    }
-                    else{
-                        echo '<script>alert("Email '.$request->employee_email.' sudah terdaftar!")</script>';
-                    }
-                }
+    
+        // employee add or update
+        if (isset($request->employee_register)) {
+            if (strlen($request->employee_password) < 8) {
+                return redirect('/thirdsidebar')->with('error', 'Password minimal 8 karakter!');
             }
-            else{
-                echo '<script>alert("Password minimal 8 karakter!")</script>';
+    
+            if ($request->employee_register == 'Ubah') {
+                if ($request->employee_password !== $request->employee_c_password) {
+                    return redirect('/thirdsidebar')->with('error', 'Password tidak sama!');
+                }
+    
+                User::where('id', $request->employee_id)->update([
+                    'name' => $request->employee_name,
+                    'email' => $request->employee_email,
+                    'password' => Hash::make($request->employee_password),
+                    'phone_number' => $request->employee_phone_number,
+                ]);
+    
+                return redirect('/thirdsidebar')->with('success', 'Data karyawan berhasil diubah!');
             }
-
+    
+            // Tambah karyawan baru
+            $check_email = User::where("email", $request->employee_email)->count();
+            if ($check_email > 0) {
+                return redirect('/thirdsidebar')->with('error', 'Email ' . $request->employee_email . ' sudah terdaftar!');
+            }
+    
+            if ($request->employee_password !== $request->employee_c_password) {
+                return redirect('/thirdsidebar')->with('error', 'Password tidak sama!');
+            }
+    
+            User::create([
+                'name' => $request->employee_name,
+                'email' => $request->employee_email,
+                'password' => Hash::make($request->employee_password),
+                'phone_number' => $request->employee_phone_number,
+                'role' => 'employee'
+            ]);
+    
+            return redirect('/thirdsidebar')->with('success', 'Karyawan berhasil ditambahkan!');
         }
-        
+    
         return redirect('/thirdsidebar');
     }
+
     public function employee_action($request, $action)
     {
         $status = '';
