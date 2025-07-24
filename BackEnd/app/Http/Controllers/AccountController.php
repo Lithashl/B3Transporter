@@ -21,12 +21,6 @@ class AccountController extends Controller
     }
     public function save_change(Request $request){
         if ($request->password != '' && $request->c_password != ''){
-            // $request->validate([
-            //     'name' => ['required', 'string', 'max:255'],
-            //     'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            //     'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            //     'phone_number' => ['required', 'string', 'max:255'],
-            // ]);
             if($request->password == $request->c_password){
                 if(strlen($request->password) >= 8){
                     $update = User::where('id', '=', $request->id_user)
@@ -70,13 +64,4 @@ class AccountController extends Controller
         $data = [$user, '', '', '', $menu_section, ''];
         return view('account')->with('data',$data);
     }
-    // public function validator(array $data)
-    // {
-    //     return Validator::make($data, [
-    //         'name' => ['required', 'string', 'max:255'],
-    //         'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-    //         'password' => ['required', 'string', 'min:8', 'confirmed'],
-    //         'phone_number' => ['required', 'string', 'max:255'],
-    //     ]);
-    // }
 }
