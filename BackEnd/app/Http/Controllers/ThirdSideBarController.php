@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Auth;
 
 class ThirdSideBarController extends Controller
 {
+    /** Gunakan konstanta untuk path yang berulang */
+    private const SIDEBAR_PATH = '/thirdsidebar';
+
     public function index()
     {
         $user = Auth::user();
@@ -45,7 +48,7 @@ class ThirdSideBarController extends Controller
             'status' => 'Picked'
         ]);
 
-        return redirect('/thirdsidebar');
+        return redirect(self::SIDEBAR_PATH);
     }
 
     public function store(Request $request)
@@ -59,7 +62,7 @@ class ThirdSideBarController extends Controller
             ]);
 
             $this->update($request->request_id, $pickup->id);
-            return redirect('/thirdsidebar')->with('success', 'Pickup berhasil dilakukan.');
+            return redirect(self::SIDEBAR_PATH)->with('success', 'Pickup berhasil dilakukan.');
         }
 
         // Complete
@@ -80,12 +83,12 @@ class ThirdSideBarController extends Controller
         // Register/update employee
         if ($request->has('employee_register')) {
             if (strlen($request->employee_password) < 8) {
-                return redirect('/thirdsidebar')->with('error', 'Password minimal 8 karakter!');
+                return redirect(self::SIDEBAR_PATH)->with('error', 'Password minimal 8 karakter!');
             }
 
             if ($request->employee_register === 'Ubah') {
                 if ($request->employee_password !== $request->employee_c_password) {
-                    return redirect('/thirdsidebar')->with('error', 'Password tidak sama!');
+                    return redirect(self::SIDEBAR_PATH)->with('error', 'Password tidak sama!');
                 }
 
                 User::where('id', $request->employee_id)->update([
@@ -95,15 +98,15 @@ class ThirdSideBarController extends Controller
                     'phone_number' => $request->employee_phone_number,
                 ]);
 
-                return redirect('/thirdsidebar')->with('success', 'Data karyawan berhasil diubah!');
+                return redirect(self::SIDEBAR_PATH)->with('success', 'Data karyawan berhasil diubah!');
             }
 
             if (User::where('email', $request->employee_email)->exists()) {
-                return redirect('/thirdsidebar')->with('error', 'Email sudah terdaftar!');
+                return redirect(self::SIDEBAR_PATH)->with('error', 'Email sudah terdaftar!');
             }
 
             if ($request->employee_password !== $request->employee_c_password) {
-                return redirect('/thirdsidebar')->with('error', 'Password tidak sama!');
+                return redirect(self::SIDEBAR_PATH)->with('error', 'Password tidak sama!');
             }
 
             User::create([
@@ -114,10 +117,10 @@ class ThirdSideBarController extends Controller
                 'role' => 'employee'
             ]);
 
-            return redirect('/thirdsidebar')->with('success', 'Karyawan berhasil ditambahkan!');
+            return redirect(self::SIDEBAR_PATH)->with('success', 'Karyawan berhasil ditambahkan!');
         }
 
-        return redirect('/thirdsidebar');
+        return redirect(self::SIDEBAR_PATH);
     }
 
     public function employee_action($request, $action)
@@ -145,7 +148,7 @@ class ThirdSideBarController extends Controller
             'status' => $status,
         ]);
 
-        return redirect('/thirdsidebar')->with('success', 'Pickup berhasil ' . strtolower($status) . '.');
+        return redirect(self::SIDEBAR_PATH)->with('success', 'Pickup berhasil ' . strtolower($status) . '.');
     }
 
     public function customer_action($request)
@@ -161,7 +164,7 @@ class ThirdSideBarController extends Controller
             'status' => $request->status,
         ]);
 
-        return redirect('/thirdsidebar')->with('success', 'Request berhasil dibatalkan.');
+        return redirect(self::SIDEBAR_PATH)->with('success', 'Request berhasil dibatalkan.');
     }
 
     public static function getPickup($id)
