@@ -44,8 +44,7 @@ class AccountController extends Controller
             }
             
         }
-        else if ($request->password == '' && $request->c_password == ''){
-            $update = User::where('id', '=', $request->id_user)
+        elseif ($request->password == '' && $request->c_password == ''){
                 ->update(
                     [
                         'name'=>$request->name,
